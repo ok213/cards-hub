@@ -1,0 +1,62 @@
+buildscript {
+    ext {
+        springBootVersion = '2.3.0.M3'
+    }
+    repositories {
+        maven { url "https://repo.spring.io/milestone" }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+ext {
+    springProjects = [
+            project(':hub'),
+            project(':fines-cards'),
+            project(':advice-cards'),
+            project(':regular-cards')
+    ]
+}
+
+allprojects {
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories {
+        maven { url "https://repo.spring.io/milestone" }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    dependencyManagement {
+        dependencies {
+            dependency 'org.projectlombok:lombok:1.18.12'
+            dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.3'
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '11'
+
+    dependencies {
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor 'org.projectlombok:lombok'
+    }
+}
+
+configure(springProjects) {
+    apply plugin: 'org.springframework.boot'
+
+    dependencies {
+        compile project(':commons')
+        compile 'org.springframework.boot:spring-boot-starter-webflux'
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+}

@@ -1,0 +1,77 @@
+plugins {
+    id 'java'
+    id 'scala'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    gatling
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.12.11'
+    gatling group: 'io.gatling', name: 'gatling-app', version: '3.3.1'
+    gatling group: 'io.gatling.highcharts', name: 'gatling-charts-highcharts', version: '3.3.1'
+}
+
+sourceSets {
+    simulations {
+        scala {
+            srcDirs = ['simulations/load']
+        }
+        resources {
+            srcDirs = ['simulations/resources']
+        }
+
+        compileClasspath += configurations.gatling
+    }
+}
+
+task gatlingSimple(type: JavaExec) {
+    description = 'Run simple gatling tests'
+//    new File("reports").mkdirs()
+
+    classpath = sourceSets.simulations.runtimeClasspath + configurations.gatling
+    main = "io.gatling.app.Gatling"
+
+    args = ['-s', 'simulations.SimpleSimulation',
+            '-sf', 'simulations/resources',
+            '-rf', "reports"
+    ]
+
+    jvmArgs = [
+            "-Xms512m",
+            "-Xmx512m",
+            "-Djava.net.preferIPv4Stack=true",
+            "-Djava.net.preferIPv6Addresses=false"
+    ]
+}
+
+task gatlingAdvanced(type: JavaExec) {
+    description = 'Run advanced gatling tests'
+//    new File("reports").mkdirs()
+
+    systemProperties System.getProperties()
+    classpath = sourceSets.simulations.runtimeClasspath + configurations.gatling
+    main = "io.gatling.app.Gatling"
+
+    args = ['-s', 'simulations.AdvancedSimulation',
+            '-sf', 'simulations/resources',
+            '-rf', "reports"
+    ]
+
+    jvmArgs = [
+            "-Xms512m",
+            "-Xmx512m",
+            "-Djava.net.preferIPv4Stack=true",
+            "-Djava.net.preferIPv6Addresses=false"
+    ]
+}
